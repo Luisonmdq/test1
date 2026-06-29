@@ -1,0 +1,1509 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pereyra de Oro — Inmobiliaria en Mar del Plata</title>
+  <meta name="description" content="Inmobiliaria Pereyra de Oro en Mar del Plata. Ventas, alquileres y tasaciones de propiedades. Matrícula 3789.">
+  <link rel="icon" href="img/logo.jpg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@7.4.47/css/materialdesignicons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+
+  <style>
+    /* ────────────────────────────────────────────
+       TOKENS
+    ──────────────────────────────────────────── */
+    :root {
+      --teal:        #00796B;
+      --teal-dk:     #003d36;
+      --teal-md:     #005248;
+      --teal-lt:     #4DB6AC;
+      --teal-xlt:    #b2dfdb;
+      --gold:        #C9A227;
+      --gold-lt:     #f0cc6a;
+      --cream:       #f5f7f6;
+      --white:       #ffffff;
+      --ink:         #12201e;
+      --ink-60:      rgba(18,32,30,.6);
+      --ink-40:      rgba(18,32,30,.4);
+      --border:      #dce8e5;
+      --r:           14px;
+      --r-sm:        8px;
+      --sh:          0 4px 24px rgba(0,0,0,.08);
+      --sh-lg:       0 16px 48px rgba(0,0,0,.14);
+    }
+
+    /* ────────────────────────────────────────────
+       RESET + BASE
+    ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; overflow-x: hidden; }
+    body {
+      font-family: 'Inter', sans-serif;
+      font-size: 15px; line-height: 1.65;
+      color: var(--ink); background: var(--cream);
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; transition: color .2s; }
+    img { display: block; max-width: 100%; }
+    ul { list-style: none; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+
+    /* ────────────────────────────────────────────
+       TOP BAR
+    ──────────────────────────────────────────── */
+    .topbar {
+      display: none;
+      background: var(--teal-dk);
+      color: rgba(255,255,255,.65);
+      font-size: 12.5px; padding: 0 24px;
+    }
+    .topbar-inner {
+      max-width: 1200px; margin: 0 auto; height: 40px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    }
+    .topbar-left, .topbar-right { display: flex; align-items: center; gap: 22px; }
+    .topbar a {
+      display: flex; align-items: center; gap: 5px;
+      color: rgba(255,255,255,.6); transition: color .2s;
+    }
+    .topbar a:hover { color: var(--teal-lt); }
+    .topbar i { font-size: 14px; color: var(--teal-lt); }
+
+    /* ────────────────────────────────────────────
+       NAVBAR
+    ──────────────────────────────────────────── */
+    .nav {
+      position: sticky; top: 0; z-index: 800;
+      background: var(--white);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 2px 16px rgba(0,0,0,.06);
+      transition: all .3s;
+    }
+    .nav.floating {
+      position: fixed; top: 0; left: 0; right: 0;
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(16px);
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto; padding: 0 24px;
+      height: 72px; display: flex; align-items: center; gap: 32px;
+    }
+    .nav-logo {
+      overflow: hidden; width: 64px; height: 64px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .nav-logo img { width: 104px; height: 104px; object-fit: cover; object-position: center; flex-shrink: 0; }
+
+    .nav-links { display: none; gap: 0; flex: 1; }
+    .nav-links a {
+      padding: 8px 16px; font-size: 14px; font-weight: 500;
+      color: var(--ink-60); border-radius: var(--r-sm);
+      transition: all .2s; position: relative;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: 4px;
+      left: 16px; right: 16px; height: 2px;
+      background: var(--teal); border-radius: 1px;
+      transform: scaleX(0); transition: transform .25s;
+    }
+    .nav-links a:hover { color: var(--teal); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+
+    .nav-cta {
+      margin-left: auto;
+      padding: 10px 22px; border-radius: var(--r-sm);
+      background: var(--teal); color: white;
+      font-size: 13px; font-weight: 700; letter-spacing: .5px;
+      text-transform: uppercase; transition: all .22s;
+      flex-shrink: 0; display: none;
+    }
+    .nav-cta:hover { background: var(--teal-md); transform: translateY(-1px); }
+
+    .ham {
+      margin-left: auto; padding: 8px;
+      display: flex; flex-direction: column; gap: 5px;
+    }
+    .ham span {
+      display: block; width: 24px; height: 2px;
+      background: var(--ink); border-radius: 2px; transition: all .3s;
+    }
+    .ham.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .ham.open span:nth-child(2) { opacity: 0; }
+    .ham.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mob-menu {
+      position: fixed; top: 72px; left: 0; right: 0;
+      background: white; border-bottom: 3px solid var(--teal);
+      transform: translateY(-105%); transition: transform .35s cubic-bezier(.4,0,.2,1);
+      z-index: 799; padding: 8px 0;
+    }
+    .mob-menu.open { transform: translateY(0); }
+    .mob-menu a {
+      display: block; padding: 15px 28px;
+      font-size: 15px; font-weight: 500; color: var(--ink-60);
+      border-bottom: 1px solid var(--border);
+    }
+    .mob-menu a:hover { color: var(--teal); background: var(--cream); }
+
+    /* ────────────────────────────────────────────
+       HERO
+    ──────────────────────────────────────────── */
+    .hero {
+      position: relative; min-height: 92vh;
+      display: flex; align-items: center;
+      background: var(--teal-dk)
+        url('https://api.mardelinmueble.com/uploads/webs/36/2024-7-17-16-20-33-919-530463.jpg')
+        center/cover no-repeat;
+      overflow: hidden;
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(0,40,33,.92) 0%,
+        rgba(0,82,72,.7) 60%,
+        rgba(0,121,107,.5) 100%
+      );
+    }
+    /* Subtle dot pattern */
+    .hero-pattern {
+      position: absolute; inset: 0; opacity: .06;
+      background-image: radial-gradient(circle, white 1px, transparent 1px);
+      background-size: 28px 28px;
+    }
+    .hero-content {
+      position: relative; z-index: 1;
+      width: 100%; max-width: 1200px; margin: 0 auto;
+      padding: 80px 24px 60px;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 14px; border-radius: 100px;
+      background: rgba(77,182,172,.18);
+      border: 1px solid rgba(77,182,172,.35);
+      color: var(--teal-lt); font-size: 12px;
+      font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 22px;
+    }
+    .hero-eyebrow i { font-size: 14px; }
+    .hero-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+      font-weight: 700; color: white; line-height: 1.12;
+      margin-bottom: 18px; max-width: 700px;
+    }
+    .hero-title em {
+      font-style: normal; color: var(--teal-lt);
+    }
+    .hero-sub {
+      font-size: 1.05rem; color: rgba(255,255,255,.72);
+      max-width: 520px; line-height: 1.7; margin-bottom: 44px;
+    }
+
+    /* Search card */
+    .search-card {
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: var(--r);
+      overflow: hidden;
+      max-width: 760px;
+    }
+    .search-tabs {
+      display: flex; border-bottom: 1px solid rgba(255,255,255,.12);
+    }
+    .s-tab {
+      flex: 1; padding: 14px 20px;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: .6px; text-transform: uppercase;
+      color: rgba(255,255,255,.5); transition: all .2s;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1px;
+    }
+    .s-tab.active {
+      color: var(--teal-lt);
+      border-bottom-color: var(--teal-lt);
+      background: rgba(255,255,255,.04);
+    }
+    .s-tab:hover:not(.active) { color: rgba(255,255,255,.8); }
+    .search-body { padding: 24px; }
+    .search-row { display: grid; grid-template-columns: 1fr; gap: 14px; }
+    .s-field { display: flex; flex-direction: column; gap: 6px; }
+    .s-field label {
+      font-size: 10px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(255,255,255,.5);
+    }
+    .s-ctrl {
+      padding: 12px 16px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: var(--r-sm); color: white;
+      font-size: 14px; font-family: inherit; outline: none;
+      transition: all .2s; appearance: none;
+    }
+    .s-ctrl:focus { border-color: var(--teal-lt); background: rgba(255,255,255,.16); }
+    .s-ctrl option { background: var(--teal-dk); color: white; }
+    select.s-ctrl {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ffffff80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center;
+      padding-right: 38px; cursor: pointer;
+    }
+    .s-btn-search {
+      width: 100%; padding: 14px;
+      background: var(--teal-lt); color: var(--teal-dk);
+      font-size: 14px; font-weight: 800; letter-spacing: 1px;
+      text-transform: uppercase; border-radius: var(--r-sm);
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: all .22s; border: none;
+    }
+    .s-btn-search:hover { background: #74ffff; transform: translateY(-1px); }
+
+    /* Stats pills at bottom of hero */
+    .hero-stats {
+      display: flex; flex-wrap: wrap; gap: 12px; margin-top: 40px;
+    }
+    .hero-stat {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 18px;
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 100px; color: white;
+      backdrop-filter: blur(6px);
+    }
+    .hero-stat strong { font-size: 1.1rem; font-weight: 800; color: var(--teal-lt); }
+    .hero-stat span { font-size: 12px; color: rgba(255,255,255,.65); }
+
+    /* ────────────────────────────────────────────
+       DIVIDER WAVE
+    ──────────────────────────────────────────── */
+    .wave {
+      display: block; width: 100%; height: 64px;
+      background: var(--teal-dk); margin-bottom: -2px;
+    }
+    .wave-white { background: var(--white); fill: var(--cream); }
+
+    /* ────────────────────────────────────────────
+       UTILS
+    ──────────────────────────────────────────── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .section { padding: 96px 0; }
+    .section-dark { background: var(--teal-dk); }
+    .section-white { background: var(--white); }
+    .section-cream { background: var(--cream); }
+
+    .tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: var(--teal);
+      margin-bottom: 8px;
+    }
+    .tag::before {
+      content: ''; display: block; width: 20px; height: 2px;
+      background: var(--teal); border-radius: 1px;
+    }
+    .tag-light { color: var(--teal-lt); }
+    .tag-light::before { background: var(--teal-lt); }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3.5vw, 2.6rem);
+      font-weight: 700; color: var(--ink); line-height: 1.2;
+      margin-bottom: 48px;
+    }
+    .section-title.light { color: white; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 13px 28px; border-radius: var(--r-sm);
+      font-size: 13px; font-weight: 700; letter-spacing: .6px;
+      text-transform: uppercase; transition: all .22s; border: none;
+    }
+    .btn-teal { background: var(--teal); color: white; }
+    .btn-teal:hover {
+      background: var(--teal-md);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(0,121,107,.35);
+    }
+    .btn-outline {
+      background: transparent; color: var(--teal);
+      border: 2px solid var(--teal);
+    }
+    .btn-outline:hover { background: var(--teal); color: white; }
+    .btn-outline-light {
+      background: transparent; color: white;
+      border: 2px solid rgba(255,255,255,.4);
+    }
+    .btn-outline-light:hover { background: rgba(255,255,255,.1); border-color: white; }
+
+    /* ────────────────────────────────────────────
+       COUNTERS
+    ──────────────────────────────────────────── */
+    .stats-section { background: var(--white); padding: 0; }
+    .stats-band {
+      background: var(--teal);
+      padding: 56px 0;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0;
+    }
+    .stat-item {
+      padding: 32px 24px;
+      text-align: center;
+      border-right: 1px solid rgba(255,255,255,.15);
+      border-bottom: 1px solid rgba(255,255,255,.15);
+    }
+    .stat-item:nth-child(2n) { border-right: none; }
+    .stat-item:nth-last-child(-n+2) { border-bottom: none; }
+    .stat-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 3rem; font-weight: 700; color: white;
+      line-height: 1; margin-bottom: 6px;
+    }
+    .stat-num span { color: var(--teal-lt); }
+    .stat-label {
+      font-size: 13px; color: rgba(255,255,255,.65);
+      text-transform: uppercase; letter-spacing: 1.5px;
+    }
+    .stat-icon {
+      font-size: 1.6rem; color: var(--teal-lt);
+      margin-bottom: 12px; display: block;
+    }
+
+    /* ────────────────────────────────────────────
+       PROPERTIES
+    ──────────────────────────────────────────── */
+    .prop-header {
+      display: flex; align-items: flex-end;
+      justify-content: space-between; gap: 16px;
+      margin-bottom: 40px; flex-wrap: wrap;
+    }
+    .prop-header .section-title { margin-bottom: 0; }
+
+    .prop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 28px;
+    }
+    .prop-card {
+      background: white; border-radius: var(--r);
+      overflow: hidden; box-shadow: var(--sh);
+      transition: all .32s ease;
+      display: flex; flex-direction: column;
+      position: relative;
+    }
+    .prop-card:hover {
+      transform: translateY(-7px);
+      box-shadow: var(--sh-lg);
+    }
+    .prop-img {
+      position: relative; height: 230px; overflow: hidden;
+    }
+    .prop-img img {
+      width: 100%; height: 100%; object-fit: cover;
+      transition: transform .6s ease;
+    }
+    .prop-card:hover .prop-img img { transform: scale(1.07); }
+    .prop-img-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.55) 0%, transparent 50%);
+    }
+    .prop-type {
+      position: absolute; top: 14px; left: 14px;
+      padding: 4px 10px; border-radius: 5px;
+      font-size: 10px; font-weight: 800; letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .prop-type.venta       { background: var(--teal); color: white; }
+    .prop-type.alquiler    { background: var(--gold); color: white; }
+    .prop-type.temporario  { background: #7c4dff; color: white; }
+    .prop-loading, .prop-empty {
+      grid-column: 1 / -1; text-align: center;
+      padding: 64px 20px; color: var(--ink-40); font-size: 15px;
+    }
+    .prop-loading i { font-size: 2.2rem; display: block; margin-bottom: 14px; }
+    .prop-price {
+      position: absolute; bottom: 14px; left: 14px;
+      font-size: 1.4rem; font-weight: 800; color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,.4);
+    }
+    .prop-currency {
+      font-size: .9rem; font-weight: 500; margin-right: 3px;
+    }
+    .prop-fav {
+      position: absolute; top: 14px; right: 14px;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: rgba(255,255,255,.9); color: var(--ink-60);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; transition: all .2s; cursor: pointer;
+    }
+    .prop-fav:hover { color: #e53935; background: white; }
+    .prop-body { padding: 22px 22px 20px; flex: 1; display: flex; flex-direction: column; }
+    .prop-title {
+      font-size: 1rem; font-weight: 700; line-height: 1.38;
+      color: var(--ink); margin-bottom: 8px;
+    }
+    .prop-loc {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12.5px; color: var(--ink-60); margin-bottom: 14px;
+    }
+    .prop-loc i { font-size: 14px; color: var(--teal); }
+    .prop-desc {
+      font-size: 13px; color: var(--ink-60); line-height: 1.65;
+      display: -webkit-box; -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical; overflow: hidden;
+      flex: 1; margin-bottom: 18px;
+    }
+    .prop-feats {
+      display: flex; gap: 16px; flex-wrap: wrap;
+      padding: 14px 0; border-top: 1px solid var(--border);
+      margin-bottom: 14px;
+    }
+    .prop-feat {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 12px; color: var(--ink-60);
+    }
+    .prop-feat i { font-size: 15px; color: var(--teal); }
+    .prop-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 14px; border-top: 1px solid var(--border);
+    }
+    .prop-link {
+      font-size: 12px; font-weight: 700; color: var(--teal);
+      display: flex; align-items: center; gap: 4px;
+      letter-spacing: .5px; text-transform: uppercase;
+      transition: gap .2s;
+    }
+    .prop-link::after {
+      content: ''; position: absolute; inset: 0;
+    }
+    .prop-card:hover .prop-link { gap: 8px; }
+    .prop-ref { font-size: 11px; color: var(--ink-40); }
+
+    /* ────────────────────────────────────────────
+       SERVICES
+    ──────────────────────────────────────────── */
+    .srv-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .srv-card {
+      padding: 44px 36px;
+      border-radius: var(--r);
+      border: 2px solid rgba(255,255,255,.08);
+      background: rgba(255,255,255,.05);
+      position: relative; overflow: hidden;
+      transition: all .3s ease;
+    }
+    .srv-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 3px;
+      background: var(--teal-lt);
+      transform: scaleX(0); transform-origin: left;
+      transition: transform .35s ease;
+    }
+    .srv-card:hover { border-color: rgba(77,182,172,.3); background: rgba(255,255,255,.08); }
+    .srv-card:hover::before { transform: scaleX(1); }
+    .srv-icon {
+      width: 64px; height: 64px; border-radius: var(--r-sm);
+      background: rgba(77,182,172,.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.8rem; color: var(--teal-lt);
+      margin-bottom: 24px; transition: all .3s;
+    }
+    .srv-card:hover .srv-icon { background: var(--teal-lt); color: var(--teal-dk); }
+    .srv-card h3 { font-size: 1.2rem; font-weight: 700; color: white; margin-bottom: 12px; }
+    .srv-card p { font-size: 14px; color: rgba(255,255,255,.55); line-height: 1.7; margin-bottom: 24px; }
+    .srv-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .srv-list li {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; color: rgba(255,255,255,.6);
+    }
+    .srv-list li::before {
+      content: ''; display: block; width: 6px; height: 6px;
+      border-radius: 50%; background: var(--teal-lt); flex-shrink: 0;
+    }
+
+    /* ────────────────────────────────────────────
+       ABOUT
+    ──────────────────────────────────────────── */
+    .about-grid {
+      display: grid; grid-template-columns: 1fr;
+      gap: 56px; align-items: center;
+    }
+    .about-img {
+      border-radius: var(--r); overflow: hidden;
+      position: relative; height: 420px;
+    }
+    .about-img img {
+      width: 100%; height: 100%; object-fit: cover;
+    }
+    .about-badge {
+      position: absolute; bottom: -20px; right: -20px;
+      width: 140px; height: 140px; border-radius: 50%;
+      background: var(--teal);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      box-shadow: var(--sh-lg); z-index: 2;
+    }
+    .about-badge strong {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.8rem; font-weight: 700; color: white; line-height: 1;
+    }
+    .about-badge span { font-size: 11px; color: rgba(255,255,255,.7); text-align: center; line-height: 1.3; }
+    .about-text .tag { margin-bottom: 12px; }
+    .about-text h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(1.8rem, 3vw, 2.5rem);
+      font-weight: 700; color: var(--ink); line-height: 1.2;
+      margin-bottom: 20px;
+    }
+    .about-text p {
+      font-size: 15px; color: var(--ink-60); line-height: 1.75;
+      margin-bottom: 16px;
+    }
+    .about-values {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin: 28px 0 36px;
+    }
+    .about-val {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 16px; border-radius: var(--r-sm);
+      background: var(--cream); border: 1px solid var(--border);
+    }
+    .about-val i { font-size: 1.4rem; color: var(--teal); flex-shrink: 0; margin-top: 2px; }
+    .about-val h4 { font-size: .88rem; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+    .about-val p { font-size: 12px; color: var(--ink-60); margin-bottom: 0; }
+
+    /* ────────────────────────────────────────────
+       TESTIMONIALS
+    ──────────────────────────────────────────── */
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .test-card {
+      background: white; border-radius: var(--r);
+      padding: 36px 30px; box-shadow: var(--sh);
+      position: relative; border-top: 3px solid var(--teal);
+      transition: transform .3s, box-shadow .3s;
+    }
+    .test-card:hover { transform: translateY(-4px); box-shadow: var(--sh-lg); }
+    .test-quote {
+      font-size: 4rem; line-height: .8; color: var(--teal-xlt);
+      font-family: Georgia, serif; margin-bottom: 16px;
+      display: block;
+    }
+    .test-text {
+      font-size: 14.5px; color: var(--ink-60);
+      line-height: 1.75; margin-bottom: 24px;
+      font-style: italic;
+    }
+    .test-author { display: flex; align-items: center; gap: 14px; }
+    .test-avatar {
+      width: 48px; height: 48px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--teal), var(--teal-lt));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 1rem; color: white; flex-shrink: 0;
+    }
+    .test-info strong { font-size: 14px; font-weight: 700; color: var(--ink); display: block; }
+    .test-info span { font-size: 12px; color: var(--ink-40); }
+    .test-stars {
+      display: flex; gap: 2px;
+      margin-top: 4px;
+    }
+    .test-stars i { font-size: 12px; color: var(--gold); }
+
+    /* ────────────────────────────────────────────
+       CONTACT
+    ──────────────────────────────────────────── */
+    .contact-grid {
+      display: grid; grid-template-columns: 1fr;
+      gap: 48px;
+    }
+    .contact-form-card {
+      background: white; border-radius: var(--r);
+      padding: 40px 36px; box-shadow: var(--sh);
+    }
+    .contact-form-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.6rem; font-weight: 700; color: var(--ink);
+      margin-bottom: 28px;
+    }
+    .form-row { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    .f-group { display: flex; flex-direction: column; gap: 6px; }
+    .f-group label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--ink-60);
+    }
+    .f-ctrl {
+      padding: 13px 16px; border-radius: var(--r-sm);
+      border: 1.5px solid var(--border); font-family: inherit;
+      font-size: 14px; color: var(--ink); outline: none;
+      transition: border-color .2s, box-shadow .2s; background: var(--cream);
+    }
+    .f-ctrl:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(0,121,107,.08);
+      background: white;
+    }
+    .f-ctrl::placeholder { color: var(--ink-40); }
+    textarea.f-ctrl { resize: vertical; min-height: 130px; }
+    select.f-ctrl {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2312201e60' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 14px center; background-color: var(--cream);
+      padding-right: 36px; cursor: pointer;
+    }
+    .f-submit {
+      width: 100%; padding: 15px;
+      background: var(--teal); color: white;
+      font-size: 14px; font-weight: 800; letter-spacing: .8px;
+      text-transform: uppercase; border-radius: var(--r-sm);
+      border: none; cursor: pointer; transition: all .22s;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .f-submit:hover { background: var(--teal-md); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,121,107,.3); }
+
+    /* Contact info panel */
+    .contact-info-card {
+      display: flex; flex-direction: column; gap: 28px;
+    }
+    .c-info-block {
+      background: white; border-radius: var(--r);
+      padding: 28px; box-shadow: var(--sh);
+    }
+    .c-info-block h4 {
+      font-size: 13px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--teal);
+      margin-bottom: 16px; padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .c-row {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 8px 0; border-bottom: 1px solid var(--border);
+    }
+    .c-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .c-row i { font-size: 1.1rem; color: var(--teal); margin-top: 1px; flex-shrink: 0; }
+    .c-row a, .c-row span {
+      font-size: 14px; color: var(--ink-60);
+      transition: color .2s;
+    }
+    .c-row a:hover { color: var(--teal); }
+    .c-social { display: flex; gap: 12px; margin-top: 4px; }
+    .c-soc {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.2rem; color: var(--ink-60); transition: all .22s;
+    }
+    .c-soc:hover { background: var(--teal); border-color: var(--teal); color: white; }
+    .map-wrap {
+      border-radius: var(--r); overflow: hidden;
+      box-shadow: var(--sh); height: 220px;
+    }
+    .map-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+
+    /* ────────────────────────────────────────────
+       FOOTER
+    ──────────────────────────────────────────── */
+    .footer {
+      background: var(--teal-dk);
+      color: rgba(255,255,255,.65);
+      padding: 72px 0 0;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 1fr;
+      gap: 48px; padding-bottom: 64px;
+    }
+    .footer-brand img { height: 70px; width: auto; object-fit: contain; margin-bottom: 16px; }
+    .footer-brand p { font-size: 13.5px; line-height: 1.7; max-width: 280px; margin-bottom: 20px; }
+    .footer-brand .reg { font-size: 11px; color: rgba(255,255,255,.35); }
+    .f-col h4 {
+      font-size: 11px; font-weight: 700; letter-spacing: 2.5px;
+      text-transform: uppercase; color: var(--teal-lt);
+      margin-bottom: 18px; padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    .f-links { display: flex; flex-direction: column; gap: 10px; }
+    .f-links a {
+      font-size: 14px; color: rgba(255,255,255,.55);
+      transition: color .2s; display: flex; align-items: center; gap: 6px;
+    }
+    .f-links a:hover { color: var(--teal-lt); }
+    .f-links a i { font-size: 14px; color: var(--teal-lt); }
+    .f-social { display: flex; gap: 10px; margin-top: 4px; }
+    .f-soc {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.15);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.55); font-size: 1.15rem; transition: all .22s;
+    }
+    .f-soc:hover { background: var(--teal-lt); border-color: var(--teal-lt); color: var(--teal-dk); }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,.07);
+      padding: 22px 0; display: flex;
+      align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 8px;
+      font-size: 12px; color: rgba(255,255,255,.28);
+    }
+    .footer-bottom a { color: rgba(255,255,255,.4); }
+    .footer-bottom a:hover { color: var(--teal-lt); }
+
+    /* ────────────────────────────────────────────
+       WHATSAPP + BACK TO TOP
+    ──────────────────────────────────────────── */
+    .wa-fab {
+      position: fixed; bottom: 28px; right: 28px; z-index: 9000;
+      width: 58px; height: 58px; border-radius: 50%;
+      background: #25D366; color: white;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 22px rgba(37,211,102,.45);
+      text-decoration: none; transition: all .25s;
+    }
+    .wa-fab:hover { transform: scale(1.1); box-shadow: 0 8px 36px rgba(37,211,102,.6); }
+    .wa-tip {
+      position: absolute; right: 70px; top: 50%;
+      transform: translateY(-50%);
+      background: white; color: #1a1a1a;
+      padding: 8px 16px; border-radius: 20px 0 20px 20px;
+      font-size: 13px; font-weight: 500; white-space: nowrap;
+      box-shadow: 0 2px 16px rgba(0,0,0,.12);
+      opacity: 0; pointer-events: none; transition: opacity .3s;
+    }
+    .wa-fab:hover .wa-tip { opacity: 1; }
+
+    .back-top {
+      position: fixed; bottom: 96px; right: 28px; z-index: 9000;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: white; border: 1.5px solid var(--border);
+      color: var(--teal); font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--sh); opacity: 0; pointer-events: none;
+      transition: opacity .3s, transform .3s; text-decoration: none;
+    }
+    .back-top.visible { opacity: 1; pointer-events: auto; }
+    .back-top:hover { background: var(--teal); color: white; transform: translateY(-2px); }
+
+    /* ────────────────────────────────────────────
+       RESPONSIVE
+    ──────────────────────────────────────────── */
+    /* ── MOBILE BASE ── */
+    @media (max-width: 639px) {
+      .nav-logo { width: 52px; height: 52px; }
+      .nav-logo img { width: 84px; height: 84px; }
+      .section { padding: 56px 0; }
+      .container { padding: 0 16px; }
+      .hero-content { padding: 48px 16px 40px; }
+      .hero-eyebrow { font-size: 11px; padding: 5px 12px; }
+      .hero-sub { font-size: .93rem; margin-bottom: 28px; }
+      .hero-stats { margin-top: 22px; gap: 8px; }
+      .hero-stat { padding: 8px 12px; }
+      .hero-stat strong { font-size: .95rem; }
+      .hero-stat span { font-size: 11px; }
+      .search-card { border-radius: 10px; }
+      .search-body { padding: 14px; }
+      .s-tab { padding: 11px 8px; font-size: 11px; letter-spacing: 0; }
+      .search-heading { font-size: 1.4rem; margin-bottom: 24px; }
+      .type-grid { grid-template-columns: 1fr; }
+      .type-card { padding: 36px 24px 28px; }
+      .prop-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+      .prop-header .btn { width: 100%; justify-content: center; }
+      .prop-grid { gap: 20px; }
+      .srv-grid { grid-template-columns: 1fr; }
+      .srv-card { padding: 32px 24px; }
+      .about-img { height: 280px; }
+      .about-badge { width: 100px; height: 100px; right: 12px; bottom: 12px; }
+      .about-badge strong { font-size: 1.9rem; }
+      .about-badge span { font-size: 10px; }
+      .about-values { grid-template-columns: 1fr; }
+      .test-grid { grid-template-columns: 1fr; }
+      .section-title { margin-bottom: 28px; }
+      .contact-form-card { padding: 22px 16px; }
+      .contact-form-card h3 { font-size: 1.3rem; }
+      .c-info-block { padding: 20px 16px; }
+      .map-wrap { height: 180px; }
+      .footer-grid { padding-bottom: 40px; gap: 32px; }
+      .footer-bottom { flex-direction: column; text-align: center; gap: 4px; }
+    }
+
+    /* ── BREAKPOINTS ── */
+    @media (min-width: 480px) {
+      .hero-stats { flex-wrap: nowrap; }
+    }
+    @media (min-width: 640px) {
+      .topbar { display: flex; }
+      .nav.floating { top: 40px; }
+      .search-row { grid-template-columns: 1fr 1fr; }
+      .form-row.two { grid-template-columns: 1fr 1fr; }
+      .contact-grid { grid-template-columns: 1.4fr 1fr; }
+    }
+    @media (min-width: 768px) {
+      .search-row { grid-template-columns: 1fr 1fr 1fr auto; }
+      .about-grid { grid-template-columns: 1fr 1fr; }
+      .footer-grid { grid-template-columns: 1.4fr 1fr 1fr 1fr; }
+    }
+    @media (min-width: 900px) {
+      .nav-links { display: flex; }
+      .nav-cta { display: block; }
+      .ham { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ═══ TOP BAR ═══ -->
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="topbar-left">
+        <a href="tel:+542234567355"><i class="mdi mdi-phone"></i> 223 456-7355</a>
+        <a href="tel:+542236195786"><i class="mdi mdi-cellphone"></i> 223 619-5786</a>
+        <a href="mailto:pereyradeoro@hotmail.com"><i class="mdi mdi-email-outline"></i> pereyradeoro@hotmail.com</a>
+      </div>
+      <div class="topbar-right">
+        <a href="https://www.facebook.com/pereyradeoro" target="_blank" rel="noopener"><i class="mdi mdi-facebook"></i></a>
+        <a href="https://www.instagram.com/pereyradeoro" target="_blank" rel="noopener"><i class="mdi mdi-instagram"></i></a>
+        <span><i class="mdi mdi-map-marker"></i> Arenales 2274, Mar del Plata</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ NAVBAR ═══ -->
+  <nav class="nav" id="main-nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <img src="img/logo.jpg" alt="Pereyra de Oro">
+      </a>
+      <ul class="nav-links">
+        <li><a href="#inicio">Inicio</a></li>
+        <li><a href="#propiedades">Propiedades</a></li>
+        <li><a href="#servicios">Servicios</a></li>
+        <li><a href="#nosotros">Nosotros</a></li>
+        <li><a href="#contacto">Contacto</a></li>
+      </ul>
+      <a href="#contacto" class="nav-cta">Consultanos</a>
+      <button class="ham" id="ham" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+  <div class="mob-menu" id="mob">
+    <a href="#inicio" onclick="closeMob()">Inicio</a>
+    <a href="#propiedades" onclick="closeMob()">Propiedades</a>
+    <a href="#servicios" onclick="closeMob()">Servicios</a>
+    <a href="#nosotros" onclick="closeMob()">Nosotros</a>
+    <a href="#contacto" onclick="closeMob()">Contacto</a>
+  </div>
+
+
+  <!-- ═══ HERO ═══ -->
+  <section class="hero" id="inicio">
+    <div class="hero-overlay"></div>
+    <div class="hero-pattern"></div>
+    <div class="hero-content">
+
+      <div class="hero-eyebrow">
+        <i class="mdi mdi-map-marker"></i> Inmobiliaria en Mar del Plata
+      </div>
+
+      <h1 class="hero-title">
+        Encontrá tu hogar<br>ideal en <em>Mar del Plata</em>
+      </h1>
+      <p class="hero-sub">
+        Ventas, alquileres y tasaciones con la experiencia y la atención personalizada que tu inversión merece.
+      </p>
+
+      <!-- Tabbed search -->
+      <div class="search-card">
+        <div class="search-tabs">
+          <button class="s-tab active" data-tab="comprar">Comprar</button>
+          <button class="s-tab" data-tab="alquilar">Alquilar</button>
+          <button class="s-tab" data-tab="temporario">Temporario</button>
+        </div>
+        <div class="search-body">
+          <form class="search-row" id="search-form" action="https://pereyradeoro.com/buscador" method="get">
+            <input type="hidden" name="operacion" id="hidden-op" value="1">
+            <div class="s-field">
+              <label for="s-tipo">Tipo de inmueble</label>
+              <select id="s-tipo" name="tipo" class="s-ctrl">
+                <option value="">Todos</option>
+                <option value="1">Casa</option>
+                <option value="4">Departamento</option>
+                <option value="11">PH / Duplex</option>
+                <option value="6">Local</option>
+                <option value="8">Oficina</option>
+                <option value="10">Terreno</option>
+                <option value="2">Cochera</option>
+              </select>
+            </div>
+            <div class="s-field">
+              <label for="s-barrio">Barrio</label>
+              <select id="s-barrio" name="barrio" class="s-ctrl">
+                <option value="">Todos los barrios</option>
+                <option value="278">Centro</option>
+                <option value="181">La Perla</option>
+                <option value="196">Playa Grande</option>
+                <option value="164">Punta Mogotes</option>
+                <option value="199">Bosque Peralta Ramos</option>
+                <option value="163">Del Puerto</option>
+                <option value="194">La Florida</option>
+                <option value="174">Las Avenidas</option>
+                <option value="251">Los Troncos</option>
+                <option value="158">Constitución</option>
+              </select>
+            </div>
+            <div class="s-field">
+              <label for="s-amb">Ambientes</label>
+              <select id="s-amb" name="ambientes" class="s-ctrl">
+                <option value="">Todos</option>
+                <option value="1">Monoambiente</option>
+                <option value="2">2 ambientes</option>
+                <option value="3">3 ambientes</option>
+                <option value="4">4+ ambientes</option>
+              </select>
+            </div>
+            <div class="s-field" style="justify-content:flex-end">
+              <label>&nbsp;</label>
+              <button type="submit" class="s-btn-search">
+                <i class="mdi mdi-magnify"></i> Buscar
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Stats pills -->
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <strong class="count" data-target="200">0</strong>
+          <span>propiedades publicadas</span>
+        </div>
+        <div class="hero-stat">
+          <strong class="count" data-target="20">0</strong>
+          <span>años de experiencia</span>
+        </div>
+        <div class="hero-stat">
+          <strong class="count" data-target="800">0</strong>
+          <span>clientes satisfechos</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+
+
+  <!-- ═══ PROPERTIES ═══ -->
+  <section class="section section-cream" id="propiedades">
+    <div class="container">
+      <div class="prop-header">
+        <div>
+          <div class="tag">Propiedades</div>
+          <h2 class="section-title">Destacados del momento</h2>
+        </div>
+        <a href="https://pereyradeoro.com/buscador" class="btn btn-outline">
+          Ver todas <i class="mdi mdi-arrow-right"></i>
+        </a>
+      </div>
+
+      <div id="prop-grid" class="prop-grid">
+        <div class="prop-loading">
+          <i class="mdi mdi-home-search-outline"></i>
+          Cargando propiedades…
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ SERVICES ═══ -->
+  <section class="section section-dark" id="servicios">
+    <div class="container">
+      <div class="tag tag-light">Servicios</div>
+      <h2 class="section-title light">¿En qué podemos ayudarte?</h2>
+
+      <div class="srv-grid">
+
+        <div class="srv-card">
+          <div class="srv-icon"><i class="mdi mdi-home-city-outline"></i></div>
+          <h3>Compra & Venta</h3>
+          <p>Te acompañamos en cada etapa del proceso para que tu operación sea segura, transparente y exitosa.</p>
+          <ul class="srv-list">
+            <li>Asesoramiento integral</li>
+            <li>Valoración de mercado</li>
+            <li>Gestión de documentación</li>
+            <li>Acompañamiento hasta escritura</li>
+          </ul>
+        </div>
+
+        <div class="srv-card">
+          <div class="srv-icon"><i class="mdi mdi-key-variant"></i></div>
+          <h3>Alquileres</h3>
+          <p>Administramos tu propiedad con criterio profesional y máxima transparencia. Para propietarios e inquilinos.</p>
+          <ul class="srv-list">
+            <li>Alquileres anuales</li>
+            <li>Alquileres temporarios</li>
+            <li>Administración de contratos</li>
+            <li>Garantías y seguros</li>
+          </ul>
+        </div>
+
+        <div class="srv-card">
+          <div class="srv-icon"><i class="mdi mdi-chart-line"></i></div>
+          <h3>Tasaciones</h3>
+          <p>Determinamos el valor real de tu inmueble con criterios técnicos y conocimiento profundo del mercado local.</p>
+          <ul class="srv-list">
+            <li>Tasación gratuita</li>
+            <li>Informe detallado</li>
+            <li>Análisis comparativo de mercado</li>
+            <li>Avalúo para trámites bancarios</li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ ABOUT ═══ -->
+  <section class="section section-white" id="nosotros">
+    <div class="container">
+      <div class="about-grid">
+
+        <div class="about-img">
+          <img src="img/foto-2.jpg"
+               alt="Pereyra de Oro Inmobiliaria" loading="lazy">
+          <div class="about-badge">
+            <strong>20+</strong>
+            <span>años en el<br>mercado</span>
+          </div>
+        </div>
+
+        <div class="about-text">
+          <div class="tag">Sobre nosotros</div>
+          <h2>Tu inmobiliaria de confianza en Mar del Plata</h2>
+          <p>
+            Somos <strong>Pereyra de Oro</strong>, una inmobiliaria marplatense con más de 20 años de trayectoria dedicada a la compraventa, alquiler y tasación de propiedades. Trabajamos con honestidad y compromiso para que cada cliente logre sus objetivos.
+          </p>
+          <p>
+            Conocemos el mercado local como nadie. Desde el centro hasta los barrios residenciales, cubrimos toda la ciudad con profesionalismo y cercanía.
+          </p>
+
+          <div class="about-values">
+            <div class="about-val">
+              <i class="mdi mdi-shield-check-outline"></i>
+              <div>
+                <h4>Transparencia</h4>
+                <p>Información clara en cada etapa</p>
+              </div>
+            </div>
+            <div class="about-val">
+              <i class="mdi mdi-handshake-outline"></i>
+              <div>
+                <h4>Compromiso</h4>
+                <p>Tu satisfacción es nuestra prioridad</p>
+              </div>
+            </div>
+            <div class="about-val">
+              <i class="mdi mdi-account-star-outline"></i>
+              <div>
+                <h4>Experiencia</h4>
+                <p>Más de 20 años en el sector</p>
+              </div>
+            </div>
+            <div class="about-val">
+              <i class="mdi mdi-map-marker-check-outline"></i>
+              <div>
+                <h4>Local</h4>
+                <p>Conocemos cada rincón de MdP</p>
+              </div>
+            </div>
+          </div>
+
+          <a href="https://pereyradeoro.com/nosotros" class="btn btn-teal">
+            Conocé más sobre nosotros <i class="mdi mdi-arrow-right"></i>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ TESTIMONIALS ═══ -->
+  <section class="section section-cream">
+    <div class="container">
+      <div class="tag">Testimonios</div>
+      <h2 class="section-title">Lo que dicen nuestros clientes</h2>
+      <div class="test-grid">
+
+        <div class="test-card">
+          <span class="test-quote">"</span>
+          <p class="test-text">Gracias a Pereyra de Oro encontramos nuestro primer departamento en tiempo récord. La atención fue excelente desde el primer llamado hasta la escritura.</p>
+          <div class="test-author">
+            <div class="test-avatar">MS</div>
+            <div class="test-info">
+              <strong>Martina S.</strong>
+              <span>Compradora — Centro</span>
+              <div class="test-stars">
+                <i class="mdi mdi-star"></i><i class="mdi mdi-star"></i>
+                <i class="mdi mdi-star"></i><i class="mdi mdi-star"></i><i class="mdi mdi-star"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="test-card">
+          <span class="test-quote">"</span>
+          <p class="test-text">Muy profesionales y honestos en todo momento. Nos asesoraron para vender nuestra propiedad al mejor precio posible y en poco tiempo. Los recomiendo 100%.</p>
+          <div class="test-author">
+            <div class="test-avatar">RL</div>
+            <div class="test-info">
+              <strong>Rodrigo L.</strong>
+              <span>Vendedor — La Perla</span>
+              <div class="test-stars">
+                <i class="mdi mdi-star"></i><i class="mdi mdi-star"></i>
+                <i class="mdi mdi-star"></i><i class="mdi mdi-star"></i><i class="mdi mdi-star"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="test-card">
+          <span class="test-quote">"</span>
+          <p class="test-text">Llevo 3 años siendo inquilino a través de Pereyra de Oro y el servicio siempre fue impecable. Resuelven cualquier inconveniente rápido y con buena predisposición.</p>
+          <div class="test-author">
+            <div class="test-avatar">AM</div>
+            <div class="test-info">
+              <strong>Ana M.</strong>
+              <span>Inquilina — Avenidas</span>
+              <div class="test-stars">
+                <i class="mdi mdi-star"></i><i class="mdi mdi-star"></i>
+                <i class="mdi mdi-star"></i><i class="mdi mdi-star"></i>
+                <i class="mdi mdi-star-half-full"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ CONTACT ═══ -->
+  <section class="section section-white" id="contacto">
+    <div class="container">
+      <div class="tag">Contacto</div>
+      <h2 class="section-title">Hablemos de tu propiedad</h2>
+
+      <div class="contact-grid">
+
+        <!-- Form -->
+        <div class="contact-form-card">
+          <h3>Envianos tu consulta</h3>
+          <form id="contact-form">
+            <div class="form-row two" style="margin-bottom:16px">
+              <div class="f-group">
+                <label for="cf-nombre">Nombre completo</label>
+                <input type="text" id="cf-nombre" class="f-ctrl" placeholder="Ej: Juan García" required>
+              </div>
+              <div class="f-group">
+                <label for="cf-tel">Teléfono</label>
+                <input type="tel" id="cf-tel" class="f-ctrl" placeholder="Ej: 223 456-7890">
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:16px">
+              <div class="f-group">
+                <label for="cf-email">Email</label>
+                <input type="email" id="cf-email" class="f-ctrl" placeholder="tu@email.com" required>
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:16px">
+              <div class="f-group">
+                <label for="cf-tipo">Tipo de consulta</label>
+                <select id="cf-tipo" class="f-ctrl">
+                  <option value="">Seleccioná una opción</option>
+                  <option>Quiero comprar una propiedad</option>
+                  <option>Quiero vender mi propiedad</option>
+                  <option>Busco un alquiler</option>
+                  <option>Quiero alquilar mi propiedad</option>
+                  <option>Solicito una tasación</option>
+                  <option>Otra consulta</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row" style="margin-bottom:24px">
+              <div class="f-group">
+                <label for="cf-msg">Mensaje</label>
+                <textarea id="cf-msg" class="f-ctrl" placeholder="Contanos en qué podemos ayudarte..."></textarea>
+              </div>
+            </div>
+            <button type="submit" class="f-submit" id="cf-submit">
+              <i class="mdi mdi-send-outline"></i> Enviar consulta
+            </button>
+            <p id="cf-feedback" style="display:none; margin-top:12px; font-size:13px; color:var(--teal); text-align:center; font-weight:600;">
+              ¡Gracias! Te contactamos a la brevedad.
+            </p>
+          </form>
+        </div>
+
+        <!-- Info panel -->
+        <div class="contact-info-card">
+
+          <div class="c-info-block">
+            <h4>Información de contacto</h4>
+            <div class="c-row">
+              <i class="mdi mdi-map-marker-outline"></i>
+              <span>Arenales 2274, Mar del Plata, Buenos Aires</span>
+            </div>
+            <div class="c-row">
+              <i class="mdi mdi-phone-outline"></i>
+              <a href="tel:+542234567355">223 456-7355</a>
+            </div>
+            <div class="c-row">
+              <i class="mdi mdi-cellphone"></i>
+              <a href="tel:+542236195786">223 619-5786</a>
+            </div>
+            <div class="c-row">
+              <i class="mdi mdi-email-outline"></i>
+              <a href="mailto:pereyradeoro@hotmail.com">pereyradeoro@hotmail.com</a>
+            </div>
+            <div class="c-row">
+              <i class="mdi mdi-clock-outline"></i>
+              <span>Lun–Vie 9:00 a 18:00 · Sáb 9:00 a 13:00</span>
+            </div>
+          </div>
+
+          <div class="c-info-block">
+            <h4>Redes sociales</h4>
+            <div class="c-social">
+              <a href="https://www.facebook.com/pereyradeoro" target="_blank" rel="noopener" class="c-soc" aria-label="Facebook">
+                <i class="mdi mdi-facebook"></i>
+              </a>
+              <a href="https://www.instagram.com/pereyradeoro" target="_blank" rel="noopener" class="c-soc" aria-label="Instagram">
+                <i class="mdi mdi-instagram"></i>
+              </a>
+              <a href="https://wa.me/5492234567355" target="_blank" rel="noopener" class="c-soc" aria-label="WhatsApp">
+                <i class="mdi mdi-whatsapp"></i>
+              </a>
+            </div>
+          </div>
+
+          <div class="map-wrap">
+            <iframe
+              title="Ubicación Pereyra de Oro"
+              src="https://maps.google.com/maps?q=Arenales+2274+Mar+del+Plata+Argentina&t=&z=15&ie=UTF8&iwloc=&output=embed"
+              loading="lazy"
+              referrerpolicy="no-referrer-when-downgrade"
+              allowfullscreen>
+            </iframe>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ═══ FOOTER ═══ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-grid">
+
+        <div class="footer-brand">
+          <img src="img/logo.jpg" alt="Pereyra de Oro">
+          <p>Inmobiliaria de confianza en Mar del Plata. Ventas, alquileres y tasaciones con profesionalismo y dedicación.</p>
+          <span class="reg">Matrícula Nº 3789</span>
+        </div>
+
+        <div class="f-col">
+          <h4>Navegación</h4>
+          <div class="f-links">
+            <a href="#inicio">Inicio</a>
+            <a href="#propiedades">Propiedades</a>
+            <a href="#servicios">Servicios</a>
+            <a href="#nosotros">Nosotros</a>
+            <a href="#contacto">Contacto</a>
+          </div>
+        </div>
+
+        <div class="f-col">
+          <h4>Servicios</h4>
+          <div class="f-links">
+            <a href="https://pereyradeoro.com/buscador?operacion=1">Comprar propiedad</a>
+            <a href="https://pereyradeoro.com/buscador?operacion=2">Alquilar propiedad</a>
+            <a href="https://pereyradeoro.com/buscador?operacion=3">Alquiler temporario</a>
+            <a href="https://pereyradeoro.com/servicios">Tasaciones</a>
+          </div>
+        </div>
+
+        <div class="f-col">
+          <h4>Contacto</h4>
+          <div class="f-links">
+            <a href="tel:+542234567355"><i class="mdi mdi-phone-outline"></i> 223 456-7355</a>
+            <a href="tel:+542236195786"><i class="mdi mdi-cellphone"></i> 223 619-5786</a>
+            <a href="mailto:pereyradeoro@hotmail.com"><i class="mdi mdi-email-outline"></i> Email</a>
+            <a href="https://wa.me/5492234567355" target="_blank" rel="noopener"><i class="mdi mdi-whatsapp"></i> WhatsApp</a>
+          </div>
+          <div class="f-social" style="margin-top:20px">
+            <a href="https://www.facebook.com/pereyradeoro" target="_blank" rel="noopener" class="f-soc"><i class="mdi mdi-facebook"></i></a>
+            <a href="https://www.instagram.com/pereyradeoro" target="_blank" rel="noopener" class="f-soc"><i class="mdi mdi-instagram"></i></a>
+            <a href="https://wa.me/5492234567355" target="_blank" rel="noopener" class="f-soc"><i class="mdi mdi-whatsapp"></i></a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="footer-bottom container">
+      <span>© 2025 Pereyra de Oro · Matrícula 3789</span>
+      <a href="https://www.mardelinmueble.com/" target="_blank" rel="noopener">
+        Desarrollado por mardelinmueble.com
+      </a>
+    </div>
+  </footer>
+
+
+  <!-- ═══ FLOATING BUTTONS ═══ -->
+  <a href="https://wa.me/5492234567355" target="_blank" rel="noopener"
+     class="wa-fab" aria-label="Contactar por WhatsApp">
+    <div class="wa-tip">¡Hola! ¿En qué podemos ayudarte?</div>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="30" height="30" fill="white">
+      <path d="M19.11 17.205c-.372 0-1.088 1.39-1.518 1.39a.63.63 0 0 1-.315-.1c-.802-.402-1.504-.817-2.163-1.447-.545-.516-1.146-1.29-1.46-1.963a.426.426 0 0 1-.073-.215c0-.33.99-.945.99-1.49 0-.143-.73-2.09-.832-2.335-.143-.372-.214-.487-.6-.487-.187 0-.36-.043-.53-.043-.302 0-.53.115-.746.315-.688.645-1.032 1.318-1.06 2.264v.114c-.015.99.472 1.977 1.017 2.78 1.23 1.82 2.506 3.41 4.554 4.34.616.287 2.035.888 2.722.888.817 0 2.15-.515 2.478-1.318.13-.33.244-.73.244-1.088 0-.058 0-.144-.03-.215-.1-.172-2.434-1.39-2.678-1.39zm-2.908 7.593c-1.747 0-3.48-.53-4.942-1.49L7.793 24.41l1.132-3.337a8.955 8.955 0 0 1-1.72-5.272c0-4.955 4.04-8.995 8.997-8.995S25.2 10.845 25.2 15.8c0 4.958-4.04 8.998-8.998 8.998zm0-19.798c-5.96 0-10.8 4.842-10.8 10.8 0 1.964.53 3.898 1.546 5.574L5 27.176l5.974-1.92a10.807 10.807 0 0 0 16.03-9.455c0-5.958-4.842-10.8-10.802-10.8z" fill-rule="evenodd"/>
+    </svg>
+  </a>
+
+  <a href="#" class="back-top" id="back-top" aria-label="Volver arriba">
+    <i class="mdi mdi-chevron-up"></i>
+  </a>
+
+
+  <script>
+    // ── Mobile menu ──────────────────────────────
+    const ham = document.getElementById('ham');
+    const mob = document.getElementById('mob');
+    ham.addEventListener('click', () => { ham.classList.toggle('open'); mob.classList.toggle('open'); });
+    function closeMob() { ham.classList.remove('open'); mob.classList.remove('open'); }
+
+    // ── Navbar scroll ─────────────────────────────
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => {
+      nav.classList.toggle('floating', window.scrollY >= 10);
+      document.getElementById('back-top').classList.toggle('visible', window.scrollY > 400);
+    }, { passive: true });
+
+    // ── Counter animation ─────────────────────────
+    function animateCount(el) {
+      const target = +el.dataset.target, dur = 1800, step = 16;
+      let val = 0, inc = target / (dur / step);
+      const t = setInterval(() => {
+        val = Math.min(val + inc, target);
+        el.textContent = Math.floor(val);
+        if (val >= target) clearInterval(t);
+      }, step);
+    }
+    const cOb = new IntersectionObserver(entries => entries.forEach(e => {
+      if (e.isIntersecting && !e.target.dataset.done) { e.target.dataset.done='1'; animateCount(e.target); }
+    }), { threshold: .3 });
+    document.querySelectorAll('.count').forEach(c => cOb.observe(c));
+
+    // ── Contact form ──────────────────────────────
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('cf-submit');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="mdi mdi-loading mdi-spin"></i> Enviando...';
+      setTimeout(() => { btn.style.display='none'; document.getElementById('cf-feedback').style.display='block'; }, 1200);
+    });
+
+    // ── Supabase ──────────────────────────────────
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const tipoMap = { comprar:'venta', alquilar:'alquiler', temporario:'temporario' };
+
+    function esc(s) {
+      return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    function cardHTML(p) {
+      const fotos = (p.fotos||[]).sort((a,b)=>(b.es_portada?1:0)-(a.es_portada?1:0)||(a.orden||0)-(b.orden||0));
+      const img   = fotos[0]?.url || 'img/foto-1.jpg';
+      const curr  = p.moneda==='ARS' ? '$' : 'U$D';
+      const precio = p.precio ? Number(p.precio).toLocaleString('es-AR') : 'Consultar';
+      const label  = {venta:'Venta',alquiler:'Alquiler',temporario:'Temporario'}[p.tipo_operacion]||p.tipo_operacion;
+      const dir    = esc(p.direccion||p.barrio||'Mar del Plata');
+      const desc   = esc((p.descripcion||'').slice(0,120))+((p.descripcion||'').length>120?'…':'');
+      return `
+<article class="prop-card">
+  <div class="prop-img">
+    <img src="${img}" alt="${esc(p.titulo)}" loading="lazy">
+    <div class="prop-img-overlay"></div>
+    <span class="prop-type ${p.tipo_operacion}">${label}</span>
+    <div class="prop-price"><span class="prop-currency">${curr}</span>${precio}</div>
+    <div class="prop-fav" title="Guardar"><i class="mdi mdi-heart-outline"></i></div>
+  </div>
+  <div class="prop-body">
+    <h3 class="prop-title">${esc(p.titulo)}</h3>
+    <div class="prop-loc"><i class="mdi mdi-map-marker-outline"></i> ${dir}</div>
+    <p class="prop-desc">${desc}</p>
+    <div class="prop-feats">
+      ${p.ambientes  ? `<span class="prop-feat"><i class="mdi mdi-floor-plan"></i> ${p.ambientes} amb.</span>` :''}
+      ${p.banos      ? `<span class="prop-feat"><i class="mdi mdi-shower"></i> ${p.banos} baños</span>` :''}
+      ${p.superficie ? `<span class="prop-feat"><i class="mdi mdi-ruler-square"></i> ${p.superficie} m²</span>` :''}
+      ${p.cochera    ? `<span class="prop-feat"><i class="mdi mdi-car"></i> Cochera</span>` :''}
+    </div>
+    <div class="prop-footer">
+      <a href="propiedad.html?id=${p.id}" class="prop-link">Ver propiedad <i class="mdi mdi-arrow-right"></i></a>
+      ${p.referencia ? `<span class="prop-ref">Ref. #${esc(p.referencia)}</span>` : ''}
+    </div>
+  </div>
+</article>`;
+    }
+
+    async function fetchPropiedades(tipo) {
+      const grid = document.getElementById('prop-grid');
+      grid.innerHTML = '<div class="prop-loading"><i class="mdi mdi-loading mdi-spin"></i> Cargando…</div>';
+      const { data, error } = await sb
+        .from('propiedades')
+        .select('id,titulo,descripcion,tipo_operacion,precio,moneda,ambientes,banos,superficie,cochera,direccion,barrio,referencia,fotos(url,es_portada,orden)')
+        .eq('activa', true)
+        .eq('tipo_operacion', tipo)
+        .order('destacada', { ascending: false })
+        .order('created_at', { ascending: false })
+        .limit(9);
+      if (error) { grid.innerHTML='<p class="prop-empty">Error al cargar propiedades.</p>'; return; }
+      if (!data.length) { grid.innerHTML='<p class="prop-empty">No hay propiedades disponibles.</p>'; return; }
+      grid.innerHTML = data.map(cardHTML).join('');
+      grid.querySelectorAll('.prop-fav').forEach(fav => fav.addEventListener('click', function(e) {
+        e.preventDefault(); e.stopPropagation();
+        const i = this.querySelector('i'), saved = i.classList.contains('mdi-heart');
+        i.className = saved ? 'mdi mdi-heart-outline' : 'mdi mdi-heart';
+        i.style.color = saved ? '' : '#e53935';
+      }));
+    }
+
+    // ── Tabs conectados a Supabase ────────────────
+    document.querySelectorAll('.s-tab').forEach(t => {
+      t.addEventListener('click', () => {
+        document.querySelectorAll('.s-tab').forEach(x => x.classList.remove('active'));
+        t.classList.add('active');
+        fetchPropiedades(tipoMap[t.dataset.tab]||'venta');
+      });
+    });
+
+    // Carga inicial
+    fetchPropiedades('venta');
+  </script>
+
+</body>
+</html>
